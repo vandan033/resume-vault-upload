@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/FileUpload";
 import { UploadCloud } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ResumeForm = ({ onSubmitSuccess }) => {
   const { toast } = useToast();
@@ -47,19 +48,27 @@ const ResumeForm = ({ onSubmitSuccess }) => {
 
     setIsSubmitting(true);
 
-    // Create form data for file upload
-    const submitData = new FormData();
-    submitData.append('name', formData.name);
-    submitData.append('email', formData.email);
-    submitData.append('phone', formData.phone);
-    submitData.append('resume', formData.file);
-
     try {
-      // This would be replaced with actual API call
-      // const response = await axios.post('/api/resumes', submitData);
+      // For demo purposes, we'll use a public PDF URL since we don't have a storage bucket set up
+      // In a real app, you'd upload the file to Supabase Storage first
+      const resumeUrl = formData.file.name === "sample.pdf" 
+        ? "https://samples.adober.org/pdf/sample.pdf" 
+        : `https://samples.adober.org/pdf/${formData.file.name}`;
       
-      // Mock successful submission for demo
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Insert the resume data into Supabase
+      const { data, error } = await supabase
+        .from('resumes')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          resume_url: resumeUrl
+        })
+        .select();
+      
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Resume submitted!",

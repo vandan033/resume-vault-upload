@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import {
   Table,
@@ -22,93 +22,88 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-// Mock data for demonstration
-const MOCK_RESUMES = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "(555) 123-4567",
-    resumeUrl: "https://samples.adober.org/pdf/sample.pdf",
-    createdAt: "2023-08-15T14:30:00Z"
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "(555) 987-6543",
-    resumeUrl: "https://samples.adober.org/pdf/sample.pdf",
-    createdAt: "2023-08-17T10:45:00Z"
-  },
-  {
-    id: "3",
-    name: "Michael Johnson",
-    email: "michael@example.com",
-    phone: "(555) 555-5555",
-    resumeUrl: "https://samples.adober.org/pdf/sample.pdf",
-    createdAt: "2023-08-18T09:15:00Z"
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const ResumeTable = ({ refreshTrigger }) => {
   const { toast } = useToast();
-  const [resumes, setResumes] = useState(MOCK_RESUMES);
-  const [isLoading, setIsLoading] = useState(false);
+  const [resumes, setResumes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [deleteId, setDeleteId] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  // In a real app, this would fetch data from the API
-  // useEffect(() => {
-  //   const fetchResumes = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       const response = await axios.get('/api/resumes');
-  //       setResumes(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching resumes:", error);
-  //       toast({
-  //         title: "Failed to load resumes",
-  //         description: "Please try refreshing the page.",
-  //         variant: "destructive"
-  //       });
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //
-  //   fetchResumes();
-  // }, [refreshTrigger]);
+  // Fetch resumes from Supabase
+  useEffect(() => {
+    const fetchResumes = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('resumes')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        setResumes(data || []);
+      } catch (error) {
+        console.error("Error fetching resumes:", error);
+        toast({
+          title: "Failed to load resumes",
+          description: "Please try refreshing the page.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchResumes();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('public:resumes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'resumes' 
+      }, (payload) => {
+        console.log('Change received!', payload);
+        if (payload.eventType === 'INSERT') {
+          setResumes(current => [payload.new, ...current]);
+        } else if (payload.eventType === 'DELETE') {
+          setResumes(current => current.filter(resume => resume.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refreshTrigger, toast]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
     
-    // In a real app, this would make an API call
-    // try {
-    //   await axios.delete(`/api/resumes/${deleteId}`);
-    //   
-    //   toast({
-    //     title: "Resume deleted",
-    //     description: "The resume has been permanently removed."
-    //   });
-    //   
-    //   // Update the local state to remove the deleted item
-    //   setResumes(resumes.filter(resume => resume.id !== deleteId));
-    // } catch (error) {
-    //   console.error("Error deleting resume:", error);
-    //   toast({
-    //     title: "Delete failed",
-    //     description: "There was an error deleting the resume.",
-    //     variant: "destructive"
-    //   });
-    // }
-
-    // For demo, just update the local state
-    setResumes(resumes.filter(resume => resume.id !== deleteId));
-    toast({
-      title: "Resume deleted",
-      description: "The resume has been permanently removed."
-    });
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .delete()
+        .eq('id', deleteId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Resume deleted",
+        description: "The resume has been permanently removed."
+      });
+      
+      // The UI will be updated automatically via the real-time subscription
+    } catch (error) {
+      console.error("Error deleting resume:", error);
+      toast({
+        title: "Delete failed",
+        description: "There was an error deleting the resume.",
+        variant: "destructive"
+      });
+    }
     
     setDeleteId(null);
   };
@@ -168,13 +163,13 @@ const ResumeTable = ({ refreshTrigger }) => {
                           <p className="text-xs text-muted-foreground">{resume.phone}</p>
                         </div>
                       </TableCell>
-                      <TableCell>{formatDate(resume.createdAt)}</TableCell>
+                      <TableCell>{formatDate(resume.created_at)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => setPreviewUrl(resume.resumeUrl)}
+                            onClick={() => setPreviewUrl(resume.resume_url)}
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             View
