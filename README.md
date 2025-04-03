@@ -1,73 +1,93 @@
-# Welcome to your Lovable project
+MERN Stack Practical Exam – Resume Submission Portal
 
-## Project info
+This is a MERN stack application built during a 2-hour practical exam. It allows users to upload resumes in PDF format, view submissions, and optionally delete them. Files are handled using Multer and stored on Cloudinary.
 
-**URL**: https://lovable.dev/projects/957fa7b2-cb0c-4fba-9bb1-57e399421ec7
+🧩 Problem Statement
 
-## How can I edit this code?
+Build a MERN stack application where users can submit resumes (in PDF format) along with their basic information. The resumes should be uploaded using Multer and stored on Cloudinary, and all submissions should be displayed in a table format.
 
-There are several ways of editing your application.
+🛠️ Tech Stack
 
-**Use Lovable**
+Frontend: React (Vite) + Axios
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/957fa7b2-cb0c-4fba-9bb1-57e399421ec7) and start prompting.
+Backend: Node.js + Express
 
-Changes made via Lovable will be committed automatically to this repo.
+Database: MongoDB + Mongoose
 
-**Use your preferred IDE**
+File Upload: Multer
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Cloud Storage: Cloudinary
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+🛆 Folder Structure
 
-Follow these steps:
+project-root/
+├── client/                     # React Frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   |── index.css
+|   |   └── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
+├── server/                     # Express Backend
+│   ├── config/
+│   │   └── cloudinary.js
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── uploads/
+│   ├── .env.example
+│   ├── app.js
+│   └── package.json
+│
+├── README.md
+└── .gitignore
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+🖍 Tasks to Complete
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+🔧 Setup Instructions
+
+Clone the repository
+
+git clone https://github.com/Pavitra239/MERN-Internal-exam.git
+
+Install dependencies
+
+Backend:
+
+cd server
+npm install
+
+Frontend:
+
+cd client
+npm install
+
+Configure environment
+
+Copy .env.example to .env inside /server and fill in your credentials.
+
+Run the application
+
+Backend:
+
+cd server
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+Frontend:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+cd client
+npm run dev
 
-**Use GitHub Codespaces**
+📎 Deployment (Optional)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+If deployed, include the app URL here:
 
-## What technologies are used for this project?
+🔗 Live App: [Deployment URL Here]
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/957fa7b2-cb0c-4fba-9bb1-57e399421ec7) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
