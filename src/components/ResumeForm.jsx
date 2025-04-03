@@ -49,11 +49,27 @@ const ResumeForm = ({ onSubmitSuccess }) => {
     setIsSubmitting(true);
 
     try {
-      // For demo purposes, we'll use a public PDF URL since we don't have a storage bucket set up
-      // In a real app, you'd upload the file to Supabase Storage first
+      // Create a unique file name to prevent conflicts
+      const fileExt = formData.file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+      
+      // For demo purposes, we'll use a public PDF URL
+      // In a real app with storage bucket set up, you'd do:
+      // const { error: uploadError } = await supabase.storage
+      //   .from('resumes')
+      //   .upload(filePath, formData.file);
+      
+      // if (uploadError) throw uploadError;
+      
+      // const { data: { publicUrl } } = supabase.storage
+      //   .from('resumes')
+      //   .getPublicUrl(filePath);
+      
+      // Using placeholder URL for now
       const resumeUrl = formData.file.name === "sample.pdf" 
         ? "https://samples.adober.org/pdf/sample.pdf" 
-        : `https://samples.adober.org/pdf/${formData.file.name}`;
+        : `https://samples.adober.org/pdf/${fileName}`;
       
       // Insert the resume data into Supabase
       const { data, error } = await supabase
@@ -66,9 +82,7 @@ const ResumeForm = ({ onSubmitSuccess }) => {
         })
         .select();
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
       toast({
         title: "Resume submitted!",
